@@ -1,6 +1,7 @@
 package route
 
 import (
+	"net/http"
 	"uts/database"
 	"uts/models"
 
@@ -11,19 +12,39 @@ import (
 func InsertData(c *fiber.Ctx) error {
 
 	//Tulis Jawaban Code di Sini :))
+	var data map[string]string
+
+	if err := c.BodyParser(&data); err != nil {
+		return err
+	}
+
+	user := models.User{
+		Nama:     data["nama"],
+		Username: data["username"],
+		Email:    data["email"],
+		Password: data["password"],
+	}
+
+	database.DB.Create(&user)
 
 	return c.JSON(fiber.Map{
-		"Pesan": "Data telah berhasil di tambahkan",
+		"pesan": "Data telah berhasil di tambahkan",
+		"code":  http.StatusOK,
+		"data":  user,
 	})
 }
 
 // Lengkapi Code Berikut untuk untuk Mengambil data untuk semua user - user
 func GetAllData(c *fiber.Ctx) error {
 
-	
+	users := []models.User{}
+
+	database.DB.Find(&users)
 
 	return c.JSON(fiber.Map{
-		"data": user,
+		"pesan": "Berhasil mengambil semua data user",
+		"code":  http.StatusOK,
+		"data":  users,
 	})
 
 }
@@ -31,11 +52,14 @@ func GetAllData(c *fiber.Ctx) error {
 //Lengkapi Code berikut Untuk Mengambil data dari id_user berdasarkan Parameter
 
 func GetUserByid(c *fiber.Ctx) error {
-
-
+	user := models.User{}
+	id_user := c.Params("id_user")
+	database.DB.Where("id_user = ?", id_user).Find(&user)
 
 	return c.JSON(fiber.Map{
-		"data": user,
+		"pesan": "Berhasil mengambil data user dengan id = " + id_user,
+		"code":  http.StatusOK,
+		"data":  user,
 	})
 }
 
@@ -48,7 +72,9 @@ func Delete(c *fiber.Ctx) error {
 	database.DB.Where("id_user = ?", id_user).Delete(user)
 
 	return c.JSON(fiber.Map{
-		"Pesan": "Data telah di hapus",
+		"pesan": "Data telah di hapus",
+		"code":  http.StatusOK,
+		"data":  nil,
 	})
 }
 
@@ -61,14 +87,14 @@ func Update(c *fiber.Ctx) error {
 	if err := c.BodyParser(&data); err != nil {
 		return err
 	}
-	var users models.User
-	database.DB.Find(&users)
-	//data yang di ubah 
+
+	//data yang di ubah
 	//membuat variable user berdasarkan model user
 	var user models.User
 
 	update := models.User{
 		Nama:     data["nama"],
+		Username: data["username"],
 		Email:    data["email"],
 		Password: data["password"],
 	}
@@ -77,7 +103,8 @@ func Update(c *fiber.Ctx) error {
 	database.DB.Model(&user).Where("id_user = ?", id_user).Updates(update)
 
 	return c.JSON(fiber.Map{
-		"Pesan": "Data User telah di Update",
-	
+		"pesan": "Data User telah di Update",
+		"code":  http.StatusOK,
+		"data":  update,
 	})
 }

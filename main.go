@@ -1,31 +1,28 @@
 package main
 
 import (
-	"log"
+
 	//"uts/database"
+	"log"
 	"uts/database"
 	"uts/route"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-func main(){
-
+func main() {
+	app := fiber.New()
 
 	database.Connect()
 
-	//Kumpulan Route Route 
+	//Kumpulan Route Route
 
-	
-	app.Post("/insert", route.InsertData )
-	app.Get("/getData", route.GetAllData)
-	app.Get("/getDataUser/:id_user", route.GetUserByid)
+	app.Post("/users", route.InsertData)
+	app.Get("/users", route.GetAllData)
+	app.Get("/users/:id_user", route.GetUserByid)
 
+	app.Delete("/users/:id_user", route.Delete)
+	app.Put("/users/:id_user", route.Update)
 
-	app.Get("/delete/:id_user", route.Delete)
-	app.Put("/update/:id_user", route.Update) 
-
-
-	
-	
+	log.Fatal(app.Listen(":3000"))
 }
